@@ -33,4 +33,3 @@ def clean_total_charges(df, method="drop"):
         imput = df_copy["MonthlyCharges"] * df_copy["tenure"]
         df_copy.loc[:, "TotalCharges"] = df_copy["TotalCharges"].fillna(imput)
     return df_copy
-    
