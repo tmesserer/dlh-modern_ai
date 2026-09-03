@@ -1,0 +1,938 @@
+Resources
+Read or watch:
+
+What is a decision tree? https://intranet-dlh.hbtn.io/rltoken/B9vvottN9iTwpAq8yjHTlw
+Understanding Tree-Based Machine Learning Methods https://intranet-dlh.hbtn.io/rltoken/TKP3CtGRIyIJkIW5nT_LlA
+Distinguish Between Tree-Based Machine Learning Models
+Tree Based Machine Learning Algorithms
+Decision Tree in Machine Learning
+Post pruning decision trees with cost complexity pruning
+Introduction to Random Forest
+Random Forest explained
+Random Forest Classifier – Sklearn Python Example
+Feature Importance with Random Forests
+Boosted Decision Trees
+Bagging, Boosting and Stacking: Ensemble Learning in ML Models
+What is boosting?
+Tree & Boosting Methods in Machine learning
+XGBoost vs LightGBM: How Are They Different
+Tree-based Methods
+Tree Based Machine Learning Algorithms
+References:
+
+DecisionTreeClassifier
+fit
+predict
+costcomplexitypruning_path
+classification_report
+GridSearchCV
+Post pruning decision trees with cost complexity pruning
+RandomForestClassifier
+sklearn.ensemble
+xgboost.XGBClassifier
+lightgbm.LGBMClassifier
+Learning Objectives
+At the end of this project, you are expected to be able to explain to anyone, without the help of Google:
+
+General
+What is a decision tree classifier?
+How do decision trees make splits?
+What is pre-pruning vs. post-pruning?
+What is ccp_alpha in pruning?
+How does a random forest improve over a single tree?
+What is feature importance in random forests?
+What is boosting?
+How does AdaBoost differ from Gradient Boosting?
+What are XGBoost and LightGBM?
+How do you evaluate classifier performance?
+What is the difference between bagging and boosting in ensemble learning?
+Requirements
+General
+All your files will be interpreted/compiled on Ubuntu 20.04 LTS using python3 (version 3.11)
+All your files should end with a new line
+The first line of all your files should be exactly #!/usr/bin/env python3
+A README.md file, at the root of the folder of the project, is mandatory
+Your code should use the pycodestyle style (version 2.14.0)
+All your modules should have documentation (python3 -c 'print(__import__("my_module").__doc__)')
+All your classes should have documentation (python3 -c 'print(__import__("my_module").MyClass.__doc__)')
+All your functions (inside and outside a class) should have documentation (python3 -c 'print(__import__("my_module").my_function.__doc__)' and python3 -c 'print(__import__("my_module").MyClass.my_function.__doc__)')
+All your files must be executable
+The length of your files will be tested using wc
+These are the required package versions for this project to function correctly:
+
+
+Tasks
+0. Decision Tree Classifier
+Write a function build_decision_tree(min_samples_leaf, min_samples_split, random_state) to create a decision tree classifier using Scikit-learn.
+
+The decision tree uses the Gini impurity measure to evaluate the quality of splits.
+No maximum depth is set, allowing the tree to grow until all leaves are pure or other stopping criteria are met.
+Arguments:
+
+min_samples_leaf: Minimum number of samples required to be at a leaf node.
+min_samples_split: Minimum number of samples required to split an internal node.
+random_state: Seed used by the random number generator for reproducibility.
+Returns:
+
+model: A Scikit-learn DecisionTreeClassifier instance.
+Required import:
+
+from sklearn import tree.
+$ cat 0-main.py
+#!/usr/bin/env python3
+
+build_decision_tree = __import__('0-build').build_decision_tree
+
+
+seed = 4000
+min_samples_leaf = 2
+min_samples_split = 3
+
+clf = build_decision_tree(min_samples_leaf=min_samples_leaf,
+                          min_samples_split=min_samples_split,
+                          random_state=seed)
+
+print(clf)
+print(clf.get_params())
+
+$ ./0-main.py
+DecisionTreeClassifier(min_samples_leaf=2, min_samples_split=3,
+                       random_state=4000)
+{'ccp_alpha': 0.0, 'class_weight': None, 'criterion': 'gini', 'max_depth': None, 'max_features': None, 'max_leaf_nodes': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 2, 'min_samples_split': 3, 'min_weight_fraction_leaf': 0.0, 'monotonic_cst': None, 'random_state': 4000, 'splitter': 'best'}
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 0-build.py
+
+1. Train a Tree-Based Classifier
+Write a function train_tree(clf, X, y) to train a tree-based classifier using Scikit-learn.
+
+Arguments:
+
+clf: A Scikit-learn classifier instance
+X: Input features
+y: Target labels
+Returns:
+
+None
+$ cat 1-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+build_decision_tree = __import__('0-build').build_decision_tree
+train_tree = __import__('1-train').train_tree
+
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+min_samples_leaf = 2
+min_samples_split = 3
+feature_names = wine.feature_names
+class_names = wine.target_names
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+clf = build_decision_tree(min_samples_leaf=min_samples_leaf,
+                          min_samples_split=min_samples_split,
+                          random_state=seed)
+
+train_tree(clf, X_train, y_train)
+
+plt.figure(figsize=(12, 12))
+plot_tree(clf, feature_names=feature_names, class_names=class_names, filled=True)
+plt.title("Decision Tree Classifier Trained on All WINE Dataset Features")
+plt.savefig("trained_decision_tree.png")
+plt.show()
+
+$ ./1-main.py
+trained_decision_tree.png
+
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 1-train.py
+
+2. View the Decision Rules of a Trained Tree
+Write a function draw(clf, feature_names, class_names) that displays the textual structure of a trained decision tree classifier using Scikit-learn.
+
+Arguments:
+
+clf: A trained DecisionTreeClassifier instance from Scikit-learn
+feature_names: A list of the input feature names
+class_names: A list of the target class names
+Returns:
+
+None. The function prints a readable text representation of the decision tree structure.
+$ cat 2-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+build_decision_tree = __import__('0-build').build_decision_tree
+train_tree = __import__('1-train').train_tree
+draw = __import__('2-draw').draw
+
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+min_samples_leaf = 2
+min_samples_split = 3
+feature_names = wine.feature_names
+class_names = wine.target_names
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+clf = build_decision_tree(min_samples_leaf=min_samples_leaf,
+                          min_samples_split=min_samples_split,
+                          random_state=seed)
+
+train_tree(clf, X_train, y_train)
+
+draw(clf, feature_names,class_names)
+
+$ ./2-main.py
+|--- proline <= 755.00
+|   |--- color_intensity <= 3.82
+|   |   |--- class: class_1
+|   |--- color_intensity >  3.82
+|   |   |--- flavanoids <= 1.58
+|   |   |   |--- class: class_2
+|   |   |--- flavanoids >  1.58
+|   |   |   |--- ash <= 2.26
+|   |   |   |   |--- class: class_1
+|   |   |   |--- ash >  2.26
+|   |   |   |   |--- class: class_0
+|--- proline >  755.00
+|   |--- flavanoids <= 2.25
+|   |   |--- total_phenols <= 1.62
+|   |   |   |--- class: class_2
+|   |   |--- total_phenols >  1.62
+|   |   |   |--- class: class_1
+|   |--- flavanoids >  2.25
+|   |   |--- class: class_0
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 2-draw.py
+
+3. Generate Predictions
+Write a function generate_predictions(clf, X) to generate predictions from a trained tree-based classifier using Scikit-learn.
+
+Arguments:
+
+clf: A trained Scikit-learn classifier instance
+X: Feature matrix (NumPy array or pandas DataFrame)
+Returns:
+
+A NumPy array containing the predicted class labels for the input samples.
+$ cat 3-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+build_decision_tree = __import__('0-build').build_decision_tree
+train_tree = __import__('1-train').train_tree
+generate_predictions = __import__('3-generate_predictions').generate_predictions
+
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+min_samples_leaf = 2
+min_samples_split = 3
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+clf = build_decision_tree(min_samples_leaf=min_samples_leaf,
+                          min_samples_split=min_samples_split,
+                          random_state=seed)
+
+train_tree(clf, X_train, y_train)
+
+predictions = generate_predictions(clf, X_test)
+print("Prediction vs Ground Truth Labels:\n")
+for pred, true in zip(predictions, y_test):
+    print(f"Predicted: {pred}   |   Actual: {true}")
+
+$ ./3-main.py
+Prediction vs Ground Truth Labels:
+
+Predicted: 1   |   Actual: 1
+Predicted: 2   |   Actual: 1
+Predicted: 0   |   Actual: 0
+Predicted: 2   |   Actual: 2
+Predicted: 1   |   Actual: 1
+Predicted: 1   |   Actual: 1
+Predicted: 0   |   Actual: 1
+Predicted: 1   |   Actual: 1
+Predicted: 1   |   Actual: 0
+Predicted: 0   |   Actual: 1
+Predicted: 2   |   Actual: 2
+Predicted: 1   |   Actual: 1
+Predicted: 2   |   Actual: 2
+Predicted: 1   |   Actual: 1
+Predicted: 2   |   Actual: 1
+Predicted: 2   |   Actual: 2
+Predicted: 1   |   Actual: 1
+Predicted: 0   |   Actual: 0
+Predicted: 0   |   Actual: 0
+Predicted: 0   |   Actual: 0
+Predicted: 2   |   Actual: 2
+Predicted: 0   |   Actual: 1
+Predicted: 0   |   Actual: 1
+Predicted: 2   |   Actual: 2
+Predicted: 1   |   Actual: 1
+Predicted: 0   |   Actual: 0
+Predicted: 0   |   Actual: 0
+Predicted: 1   |   Actual: 1
+Predicted: 0   |   Actual: 0
+Predicted: 0   |   Actual: 1
+Predicted: 1   |   Actual: 2
+Predicted: 1   |   Actual: 1
+Predicted: 1   |   Actual: 1
+Predicted: 1   |   Actual: 1
+Predicted: 1   |   Actual: 1
+Predicted: 1   |   Actual: 1
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 3-generate_predictions.py
+
+4. Evaluate Classifier Performance
+Write a function evaluate(true_labels, predicted_labels, class_names) that generates a detailed classification report using Scikit-learn.
+
+This report should provide a comprehensive summary of the model’s performance for each class, including:
+precision
+recall
+F1-score
+Arguments:
+
+true_labels: Ground truth labels
+predicted_labels: Predicted labels
+class_names: List of class names corresponding to the label indices
+Returns:
+
+A string containing the classification report generated by Scikit-learn.
+Required import:
+
+from sklearn import metrics.
+$  cat 4-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+build_decision_tree = __import__('0-build').build_decision_tree
+train_tree = __import__('1-train').train_tree
+generate_predictions = __import__('3-generate_predictions').generate_predictions
+evaluate = __import__('4-evaluate').evaluate
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+min_samples_leaf = 2
+min_samples_split = 3
+class_names = wine.target_names
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+clf = build_decision_tree(min_samples_leaf=min_samples_leaf,
+                          min_samples_split=min_samples_split,
+                          random_state=seed)
+
+train_tree(clf, X_train, y_train)
+
+y_pred = generate_predictions(clf, X_test)
+
+classification_report = evaluate(y_test, y_pred, class_names)
+print("\n         Decision Tree Classifier - Classification Report\n")
+print(classification_report)
+
+$ ./4-main.py
+
+         Decision Tree Classifier - Classification Report
+
+              precision    recall  f1-score   support
+
+     class_0       0.58      0.88      0.70         8
+     class_1       0.88      0.67      0.76        21
+     class_2       0.75      0.86      0.80         7
+
+    accuracy                           0.75        36
+   macro avg       0.74      0.80      0.75        36
+weighted avg       0.79      0.75      0.75        36
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 4-evaluate.py
+
+5. Pre-Pruning
+Write a function prepruning(X, y, clf) that uses Scikit-learn to perform a Grid Search for the best pre-pruning hyperparameters for a decision tree classifier.
+
+The search explores the following hyperparameters:
+
+criterion: "gini" or "entropy"
+max_depth: integer values in the range [2, 5)
+min_samples_leaf: integer values in the range [2, 5)
+min_samples_split: integer values in the range [2, 5)
+Arguments:
+
+X: Input features
+y: Target labels
+clf: An untrained DecisionTreeClassifier instance
+Returns:
+
+A dictionary containing the best combination of hyperparameters found during the grid search.
+Required import:
+
+from sklearn import model_selection.
+$ cat 5-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+from sklearn import tree
+build_decision_tree = __import__('0-build').build_decision_tree
+train_tree = __import__('1-train').train_tree
+generate_predictions = __import__('3-generate_predictions').generate_predictions
+evaluate = __import__('4-evaluate').evaluate
+prepruning = __import__('5-pre_pruning').prepruning
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+min_samples_leaf = 2
+min_samples_split = 3
+class_names = wine.target_names
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+clf = build_decision_tree(min_samples_leaf=min_samples_leaf,
+                          min_samples_split=min_samples_split,
+                          random_state=seed)
+
+best_params = prepruning(X_train, y_train,clf)
+print("Best parameters for prepruning:", best_params)
+
+prepuned_clf = tree.DecisionTreeClassifier(**best_params, random_state=seed)
+train_tree(prepuned_clf, X_train, y_train)
+
+y_pred = generate_predictions(prepuned_clf, X_test)
+classification_report = evaluate(y_test, y_pred, class_names)
+print("\n         Decision Tree Classifier After Pre-Pruning - Classification Report\n")
+print(classification_report)
+
+$ ./5-main.py
+Best parameters for prepruning: {'criterion': 'gini', 'max_depth': 4, 'min_samples_leaf': 3, 'min_samples_split': 2}
+
+         Decision Tree Classifier After Pre-Pruning - Classification Report
+
+              precision    recall  f1-score   support
+
+     class_0       0.75      0.75      0.75         8
+     class_1       0.94      0.81      0.87        21
+     class_2       0.70      1.00      0.82         7
+
+    accuracy                           0.83        36
+   macro avg       0.80      0.85      0.82        36
+weighted avg       0.85      0.83      0.84        36
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 5-pre_pruning.py
+
+6. (Post-Pruning) Retrieve the Pruning Path of a Decision Tree
+Write a function get_pruning_path(clf, X, y) that retrieves the cost-complexity pruning path for a given decision tree classifier.
+
+Arguments:
+
+clf: A DecisionTreeClassifier instance
+X: Input features
+y: Target labels
+Returns:
+
+ccp_alphas: A NumPy array containing the effective alpha values used for pruning
+impurities: A NumPy array containing the total impurity of leaves at each corresponding alpha
+$ cat 6-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+build_decision_tree = __import__('0-build').build_decision_tree
+get_pruning_path = __import__('6-pruning_path').get_pruning_path
+
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+min_samples_leaf =2
+min_samples_split=3
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+clf = build_decision_tree(min_samples_leaf=min_samples_leaf,
+                          min_samples_split=min_samples_split,
+                          random_state=seed)
+
+ccp_alphas, impurities = get_pruning_path(clf, X_train, y_train)
+print("CCP alpha values:", ccp_alphas)
+print("Total impurities:", impurities)
+
+plt.figure(figsize=(8, 6))
+plt.plot(ccp_alphas, impurities, marker='o', drawstyle='steps-post')
+plt.xlabel("ccp_alpha")
+plt.ylabel("Total Leaf Impurity")
+plt.title("Total Leaf Impurity vs ccp_alpha on Training Data")
+plt.grid(True)
+plt.show()
+
+$ ./6-main.py
+CCP alpha values: [0.         0.00469484 0.00503018 0.06497317 0.07243461 0.21830986
+ 0.28413084]
+Total impurities: [0.01408451 0.01877934 0.02380952 0.0887827  0.1612173  0.37952716
+ 0.663658  ]
+dt_task6.png
+
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 6-pruning_path.py
+
+7. (Post-Pruning) Train and Evaluate Decision Trees with Pruning
+Write a function prune_and_evaluate_trees(X_train, y_train, X_test, y_test, ccp_alphas, random_state, min_samples_leaf, min_samples_split) that trains multiple decision tree classifiers over a range of cost-complexity pruning parameters (ccp_alpha) and evaluates their performance.
+
+This function helps analyze how different pruning strengths affect model complexity and performance.
+Arguments:
+
+X_train, y_train: Training data and labels
+X_test, y_test: Testing data and labels
+ccp_alphas: A NumPy array of pruning alpha values to use for training different trees.
+random_state: Integer seed for reproducibility.
+min_samples_leaf: (int) Minimum number of samples required at a leaf node
+min_samples_split: (int) Minimum number of samples required to split an internal node
+Returns:
+
+clfs: A list of trained DecisionTreeClassifier instances, each corresponding to a ccp_alpha value.
+train_scores: A list of training accuracy scores for each classifier.
+test_scores: A list of testing accuracy scores for each classifier.
+Required import:
+
+from sklearn import tree
+train_tree = __import__('1-train').train_tree
+$ cat 7-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+build_decision_tree = __import__('0-build').build_decision_tree
+get_pruning_path = __import__('6-pruning_path').get_pruning_path
+prune_and_evaluate_trees = __import__('7-prune_decision_tree').prune_and_evaluate_trees
+
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+min_samples_leaf =2
+min_samples_split=3
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+clf = build_decision_tree(min_samples_leaf=min_samples_leaf,
+                          min_samples_split=min_samples_split,
+                          random_state=seed)
+
+ccp_alphas, _ = get_pruning_path(clf, X_train, y_train)
+
+clfs, train_scores, test_scores = prune_and_evaluate_trees(
+    X_train, y_train, X_test, y_test, ccp_alphas, seed,
+    min_samples_leaf=min_samples_leaf, min_samples_split=min_samples_split)
+
+print("Training Scores:", train_scores)
+print("Testing Scores:", test_scores)
+
+plt.figure(figsize=(8, 6))
+plt.plot(ccp_alphas, train_scores, marker='o', label='Train Accuracy', drawstyle='steps-post')
+plt.plot(ccp_alphas, test_scores, marker='o', label='Test Accuracy', drawstyle='steps-post')
+plt.xlabel('ccp_alpha')
+plt.ylabel('Accuracy')
+plt.title('Effect of ccp_alpha on Train and Test Accuracy')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+$ ./7-main.py
+Training Scores: [0.9859154929577465, 0.9859154929577465, 0.9859154929577465, 0.9507042253521126, 0.9084507042253521, 0.6971830985915493, 0.3591549295774648]
+Testing Scores: [0.75, 0.7777777777777778, 0.8333333333333334, 0.8333333333333334, 0.7222222222222222, 0.6944444444444444, 0.2222222222222222]
+dt_task7.png
+
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 7-prune_decision_tree.py
+
+8. (Post-Pruning) Best ccp_alpha for Pruning
+Write a function get_best_alpha(clfs, train_scores, test_scores, ccp_alphas) that selects the best pruning value ccp_alpha for a set of trained decision trees.
+
+This function first identifies the model(s) that achieve the highest test accuracy.
+If multiple models share this same test accuracy, it selects the one with the smallest difference between training and test accuracy to favor better generalization.
+In the event of a further tie, the model associated with the largest ccp_alpha is chosen to promote a simpler, more regularized tree.
+Arguments:
+
+clfs: List of trained DecisionTreeClassifier instances, each trained with a different ccp_alpha.
+train_scores: List of training accuracy scores corresponding to each classifier in clfs.
+test_scores: List of test accuracy scores corresponding to each classifier in clfs as well.
+ccp_alphas: List or array of ccp_alpha values used to train the classifiers.
+Returns:
+
+best_alpha: The most appropriate ccp_alpha value based on test accuracy and generalization.
+best_clf: The trained classifier associated with the best alpha.
+$ cat 8-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+build_decision_tree = __import__('0-build').build_decision_tree
+generate_predictions = __import__('3-generate_predictions').generate_predictions
+evaluate = __import__('4-evaluate').evaluate
+get_pruning_path = __import__('6-pruning_path').get_pruning_path
+prune_and_evaluate_trees = __import__('7-prune_decision_tree').prune_and_evaluate_trees
+get_best_alpha = __import__('8-best_ccp_alpha').get_best_alpha
+
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+min_samples_leaf =2
+min_samples_split=3
+class_names = wine.target_names
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+clf = build_decision_tree(min_samples_leaf=min_samples_leaf,
+                          min_samples_split=min_samples_split,
+                          random_state=seed)
+
+ccp_alphas, _ = get_pruning_path(clf, X_train, y_train)
+
+clfs, train_scores, test_scores = prune_and_evaluate_trees(
+    X_train, y_train, X_test, y_test, ccp_alphas, seed,
+    min_samples_leaf=min_samples_leaf, min_samples_split=min_samples_split)
+
+best_alpha, best_pruned_clf = get_best_alpha(clfs, train_scores, test_scores, ccp_alphas)
+print(f"Best alpha: {best_alpha}")
+
+y_pred = generate_predictions(best_pruned_clf, X_test)
+classification_report = evaluate(y_test, y_pred, class_names)
+print("\n         Post Pruned Decision Tree Classifier - Classification Report\n")
+print(classification_report)
+
+$ ./8-main.py
+Best alpha: 0.06497317236753855
+
+         Post Pruned Decision Tree Classifier - Classification Report
+
+              precision    recall  f1-score   support
+
+     class_0       0.64      0.88      0.74         8
+     class_1       0.94      0.81      0.87        21
+     class_2       0.86      0.86      0.86         7
+
+    accuracy                           0.83        36
+   macro avg       0.81      0.85      0.82        36
+weighted avg       0.86      0.83      0.84        36
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 8-best_ccp_alpha.py
+
+9. Random Forest Classifier
+Write a function random_forest(n_estimators, random_state) to create a random forest classifier using Scikit-learn.
+
+Arguments:
+
+n_estimators: Number of trees in the forest.
+random_state: Seed used by the random number generator for reproducibility.
+Returns:
+
+model: A Scikit-learn RandomForestClassifier instance.
+Required import:
+
+from sklearn import ensemble.
+$ cat 9-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+random_forest = __import__('9-random_forest').random_forest
+train_tree = __import__('1-train').train_tree
+generate_predictions = __import__('3-generate_predictions').generate_predictions
+evaluate = __import__('4-evaluate').evaluate
+
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+n = 20
+class_names = wine.target_names
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+rf = random_forest(n_estimators=n, random_state=seed)
+print(rf)
+print(rf.get_params())
+
+train_tree(rf, X_train, y_train)
+
+y_pred = generate_predictions(rf, X_test)
+
+classification_report = evaluate(y_test, y_pred, class_names)
+print("\n         Random Forest Classifier - Classification Report\n")
+print(classification_report)
+
+$./9-main.py
+RandomForestClassifier(n_estimators=20, random_state=4000)
+{'bootstrap': True, 'ccp_alpha': 0.0, 'class_weight': None, 'criterion': 'gini', 'max_depth': None, 'max_features': 'sqrt', 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'monotonic_cst': None, 'n_estimators': 20, 'n_jobs': None, 'oob_score': False, 'random_state': 4000, 'verbose': 0, 'warm_start': False}
+
+         Random Forest Classifier - Classification Report
+
+              precision    recall  f1-score   support
+
+     class_0       0.89      1.00      0.94         8
+     class_1       1.00      0.90      0.95        21
+     class_2       0.88      1.00      0.93         7
+
+    accuracy                           0.94        36
+   macro avg       0.92      0.97      0.94        36
+weighted avg       0.95      0.94      0.94        36
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 9-random_forest.py
+
+10. Feature Importance with Random Forest
+Write a function feature_importance(rf) that computes and returns the feature importances from a trained random forest model.
+
+Arguments:
+
+rf: A trained Scikit-learn RandomForestClassifier instance.
+Returns:
+
+importances: A NumPy array of feature importance scores.
+indices: A NumPy array of feature indices sorted from least to most important (ascending order).
+Required import:
+
+import numpy as np.
+$ cat 10-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
+random_forest = __import__('9-random_forest').random_forest
+train_tree = __import__('1-train').train_tree
+feature_importance = __import__('10-feature_importance').feature_importance
+
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+n = 20
+feature_names = wine.feature_names
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+rf = random_forest(n_estimators=n, random_state=seed)
+
+train_tree(rf, X_train, y_train)
+
+importances, indices = feature_importance(rf)
+
+plt.figure(figsize=(10, 6))
+plt.barh(range(len(importances)), importances[indices])
+plt.yticks(range(len(importances)), [feature_names[i] for i in indices])
+plt.xlabel("Feature Importance")
+plt.title("Random Forest - Feature Importances")
+plt.tight_layout()
+plt.show()
+
+$ ./10.main.py
+dt_task10.png
+
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 10-feature_importance.py
+
+11. Boosting
+Write a function compare_boosting_classifiers(name, n_estimators, random_state) that initializes and returns an untrained boosting classifier based on the specified algorithm name.
+
+Initialize the selected model with the specified n_estimators and random_state.
+For LightGBM, verbose is set to -1 to suppress training logs.
+Raise a ValueError with the message “Unknown model name '{name}'” if the provided model name is invalid.
+Arguments:
+
+name (str): Name of the boosting algorithm. Must be one of:
+
+'adaboost' — returns an AdaBoostClassifier
+
+'gradientboosting' — returns a GradientBoostingClassifier
+
+'xgboost' — returns an XGBClassifier
+
+'lightgbm' — returns an LGBMClassifier
+
+n_estimators (int): Number of boosting iterations (trees).
+
+random_state (int): Random seed for reproducibility.
+
+Returns:
+
+An untrained instance of the selected boosting classifier.
+Required import:
+
+from sklearn import ensemble
+import xgboost as xgb
+import lightgbm as lgb
+$ cat 11-main.py
+#!/usr/bin/env python3
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+import time
+from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+import warnings
+train_tree = __import__('1-train').train_tree
+generate_predictions = __import__('3-generate_predictions').generate_predictions
+compare_boosting_classifiers = __import__('11-boosting').compare_boosting_classifiers
+
+
+wine = load_wine()
+X = wine.data
+y = wine.target
+
+seed = 4000
+n_estimators = 20
+n_runs = 500
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=seed
+)
+
+model_names = ["adaboost", "gradientboosting", "xgboost", "lightgbm"]
+
+accuracies = {}
+avg_train_times = {}
+
+warnings.filterwarnings("ignore", category=UserWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+
+for name in model_names:
+
+    times = []
+    for _ in range(n_runs):
+        model = compare_boosting_classifiers(name, n_estimators, seed)
+        start = time.time()
+        train_tree(model, X_train, y_train)
+        end = time.time()
+        times.append(end - start)
+    avg_time = sum(times) / n_runs
+
+    train_tree(model, X_train, y_train)
+    y_pred = generate_predictions(model, X_test)
+    acc = accuracy_score(y_test, y_pred)
+
+    accuracies[name] = acc
+    avg_train_times[name] = avg_time
+
+plt.figure(figsize=(9, 5))
+colors = ['blue', 'orange', 'green', 'red']
+plt.bar(accuracies.keys(), accuracies.values(), color=colors)
+plt.title("Accuracy Comparison of Boosting Classifiers on the Wine Dataset")
+plt.ylabel("Accuracy")
+plt.ylim(0, 1)
+for i, v in enumerate(accuracies.values()):
+    plt.text(i, v + 0.01, f"{v:.2f}", ha='center', fontweight='bold')
+plt.show()
+
+plt.figure(figsize=(9, 5))
+plt.bar(avg_train_times.keys(), avg_train_times.values(), color=colors)
+plt.ylabel("Time (seconds)")
+plt.title("Average Training Time (500 runs) for Boosting Classifiers")
+for i, v in enumerate(avg_train_times.values()):
+    plt.text(i, v + 0.001, f"{v:.3f}", ha='center', fontweight='bold')
+plt.show()
+
+$ ./11-main.py
+pltA.png
+
+pltB.png
+
+NOTE: For the 2nd plot, Training time may vary across machines due to hardware and system differences
+
+Repo:
+
+GitHub repository: dlh-modern_ai
+Directory: machine_learning/tree_models
+File: 11-boosting.py
+
+
+
+
