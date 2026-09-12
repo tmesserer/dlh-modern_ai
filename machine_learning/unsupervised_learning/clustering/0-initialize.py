@@ -23,6 +23,6 @@ def initialize(X, k):
         size = [k, X.shape[1]]
         clusters = np.random.uniform(min_X, max_X, size)
         return clusters
-
-    except (ValueError, TypeError, AttributeError):
+    
+    except:
         return None
