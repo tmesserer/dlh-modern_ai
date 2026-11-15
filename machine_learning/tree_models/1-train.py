@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Module for building decision tree models using scikit-learn"""
-from sklearn import tree
 
 
 def train_tree(clf, X, y):
